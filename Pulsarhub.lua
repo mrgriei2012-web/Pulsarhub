@@ -1,4 +1,4 @@
--- c00lkidd214anzz Hub | Visuals Edition
+-- c00lkidd214anzz Hub | Pulsar Edition
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
@@ -6,22 +6,11 @@ local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
--- Выбери язык при запуске: "EN" (English) или "RU" (Русский)
-local CurrentLang = "RU" 
-
-local function L(enText, ruText)
-    if CurrentLang == "RU" then
-        return ruText
-    else
-        return enText
-    end
-end
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/sirius-menu/Rayfield/main/source.lua'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = L("Pulsar Hub | by c00lkidd214anzz", "Pulsar Hub | by c00lkidd214anzz"),
-    LoadingTitle = L("Loading script...", "Загрузка скрипта..."),
+    Name = "Pulsar Hub | by c00lkidd214anzz",
+    LoadingTitle = "Загрузка скрипта...",
     LoadingSubtitle = "by c00lkidd214anzz",
     ConfigurationSaving = {
         Enabled = true,
@@ -31,7 +20,7 @@ local Window = Rayfield:CreateWindow({
     KeySystem = false,
 })
 
--- Переменные состояний
+-- Состояния
 local ESP_Enabled = false
 local Show_Names = true   
 local Show_Dist = true    
@@ -47,10 +36,11 @@ local GazeLine_Enabled = true
 local OutOfView_Enabled = true
 
 local InfJump_Enabled = false
-local BHop_Enabled = false -- Банихоп
+local BHop_Enabled = false
+local Noclip_Enabled = false
 local Aimbot_Enabled = false
-local Aimbot_Mode = "Плавный (Smooth)" -- Режим аимбота
-local Aimbot_TargetPart = "Head" -- Цель (Голова / Туловище)
+local Aimbot_Mode = "Плавный (Smooth)"
+local Aimbot_TargetPart = "Head"
 local Aimbot_Smooth = 5
 local Aimbot_TeamCheck = true
 local Aimbot_WallCheck = true
@@ -60,7 +50,6 @@ local FOV_Radius = 150
 local AutoParry_Enabled = false
 local MM2_Revealer = true
 
--- Функции
 local ThirdPerson_Enabled = false
 local AntiAim_Mode = "Выключено"
 local JumpCircle_Enabled = false
@@ -95,9 +84,7 @@ local function OnCharacterAdded(character)
         Original_Jump = hum.UseJumpPower and hum.JumpPower or hum.JumpHeight
         
         if ThirdPerson_Enabled then
-            task.delay(0.3, function()
-                ApplyThirdPerson()
-            end)
+            task.delay(0.3, function() ApplyThirdPerson() end)
         end
 
         hum.StateChanged:Connect(function(oldState, newState)
@@ -149,9 +136,7 @@ local function updateWalkTrail()
     local hrp = LocalPlayer.Character.HumanoidRootPart
     local currentPos = hrp.Position - Vector3.new(0, 2.5, 0)
 
-    if lastTrailPos == Vector3.new(0,0,0) then
-        lastTrailPos = currentPos
-    end
+    if lastTrailPos == Vector3.new(0,0,0) then lastTrailPos = currentPos end
 
     if (currentPos - lastTrailPos).Magnitude > 1.2 then
         local distance = (currentPos - lastTrailPos).Magnitude
@@ -215,8 +200,7 @@ local function setupESPForPlayer(p)
         oivArrow.Visible = false; oivArrow.Filled = true; oivArrow.Thickness = 1
 
         local bones = {}
-        local boneNames = {"Head_Neck", "Neck_Chest", "LeftUpperArm", "RightUpperArm", "LeftLowerArm", "RightLowerArm", "LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg"}
-        for _, _ in pairs(boneNames) do
+        for i = 1, 10 do
             local line = Drawing.new("Line")
             line.Visible = false; line.Thickness = 1.5
             table.insert(bones, line)
@@ -250,17 +234,17 @@ Players.PlayerRemoving:Connect(function(p)
     end
 end)
 
--- ==================== ВКЛАДКИ ИНТЕРФЕЙСА ====================
-local AimTab = Window:CreateTab(L("Aimbot", "Аимбот"), 4483362458)
-AimTab:CreateToggle({Name = L("Enable Aimbot", "Включить Аимбот"), CurrentValue = false, Callback = function(v) Aimbot_Enabled = v end})
+-- ВКЛАДКИ ИНТЕРФЕЙСА
+local AimTab = Window:CreateTab("Аимбот", 4483362458)
+AimTab:CreateToggle({Name = "Включить Аимбот", CurrentValue = false, Callback = function(v) Aimbot_Enabled = v end})
 AimTab:CreateDropdown({
-    Name = L("Aimbot Mode", "Режим Аимбота"),
+    Name = "Режим Аимбота",
     Options = {"Плавный (Smooth / Legit)", "Рейдж (Rage / Snap Lock)"},
     CurrentOption = "Плавный (Smooth / Legit)",
     Callback = function(Opt) Aimbot_Mode = Opt[1] end
 })
 AimTab:CreateDropdown({
-    Name = L("Target Part", "Цель на теле"),
+    Name = "Цель на теле",
     Options = {"Head", "HumanoidRootPart (Туловище)"},
     CurrentOption = "Head",
     Callback = function(Opt) 
@@ -268,83 +252,62 @@ AimTab:CreateDropdown({
         else Aimbot_TargetPart = "HumanoidRootPart" end 
     end
 })
-AimTab:CreateSlider({Name = L("Aimbot Smoothness", "Плавность (для Smooth режима)"), Range = {1, 20}, Increment = 1, CurrentValue = 5, Flag = "Smooth", Callback = function(v) Aimbot_Smooth = v end})
-AimTab:CreateToggle({Name = L("Team Check", "Team Check (Свои)"), CurrentValue = true, Callback = function(v) Aimbot_TeamCheck = v end})
-AimTab:CreateToggle({Name = L("Wall Check", "Wall Check (Сквозь стены)"), CurrentValue = true, Callback = function(v) Aimbot_WallCheck = v end})
-AimTab:CreateToggle({Name = L("Show FOV Circle", "Показывать круг FOV"), CurrentValue = true, Callback = function(v) FOV_Enabled = v end})
-AimTab:CreateSlider({Name = L("FOV Radius", "Радиус FOV"), Range = {50, 500}, Increment = 5, CurrentValue = 150, Flag = "FOV", Callback = function(v) FOV_Radius = v end})
-
-local TeleportTab = Window:CreateTab(L("Teleports", "Телепорты"), 4483362458)
-local selectedPlayerToTP = nil
-local playerDropdownOptions = {}
-for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer then table.insert(playerDropdownOptions, p.Name) end end
-TeleportTab:CreateDropdown({Name = L("Select Player", "Выбрать игрока"), Options = playerDropdownOptions, CurrentOption = "", Callback = function(Opt) selectedPlayerToTP = Opt[1] end})
-TeleportTab:CreateButton({Name = L("Teleport to Player", "Телепортироваться к игроку"), Callback = function()
-    if selectedPlayerToTP then
-        local tp = Players:FindFirstChild(selectedPlayerToTP)
-        if tp and tp.Character and tp.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = tp.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-        end
-    end
-end})
+AimTab:CreateSlider({Name = "Плавность (Smooth)", Range = {1, 20}, Increment = 1, CurrentValue = 5, Flag = "Smooth", Callback = function(v) Aimbot_Smooth = v end})
+AimTab:CreateToggle({Name = "Team Check (Свои)", CurrentValue = true, Callback = function(v) Aimbot_TeamCheck = v end})
+AimTab:CreateToggle({Name = "Wall Check (Сквозь стены)", CurrentValue = true, Callback = function(v) Aimbot_WallCheck = v end})
+AimTab:CreateToggle({Name = "Показывать круг FOV", CurrentValue = true, Callback = function(v) FOV_Enabled = v end})
+AimTab:CreateSlider({Name = "Радиус FOV", Range = {50, 500}, Increment = 5, CurrentValue = 150, Flag = "FOV", Callback = function(v) FOV_Radius = v end})
 
 local BBTab = Window:CreateTab("Blade Ball", 4483362458)
-BBTab:CreateToggle({Name = L("Auto Parry", "Авто-Блок (Auto Parry)"), CurrentValue = false, Callback = function(v) AutoParry_Enabled = v end})
+BBTab:CreateToggle({Name = "Авто-Блок (Auto Parry)", CurrentValue = false, Callback = function(v) AutoParry_Enabled = v end})
 
 local MM2Tab = Window:CreateTab("Murder Mystery 2", 4483362458)
-MM2Tab:CreateToggle({Name = L("MM2 Roles (Revealer)", "MM2 Роли (Revealer)"), CurrentValue = true, Callback = function(v) MM2_Revealer = v end})
+MM2Tab:CreateToggle({Name = "MM2 Роли (Revealer)", CurrentValue = true, Callback = function(v) MM2_Revealer = v end})
 
--- ==================== ВКЛАДКА ВИЗУАЛОВ ====================
-local VisTab = Window:CreateTab(L("Visuals", "Визуалы"), 4483362458)
-VisTab:CreateToggle({Name = L("Enable ESP Master", "Включить ESP Master"), CurrentValue = false, Callback = function(v) 
+local VisTab = Window:CreateTab("Визуалы", 4483362458)
+VisTab:CreateToggle({Name = "Включить ESP Master", CurrentValue = false, Callback = function(v) 
     ESP_Enabled = v 
     if not v then for _, o in pairs(espObjects) do pcall(function() o.Box.Visible = false; for _,c in pairs(o.Corners) do c.Visible = false end; o.Tracer.Visible = false; o.Text.Visible = false end) end end
 end})
 
-VisTab:CreateToggle({Name = L("Corner Box", "Corner Box (Стильные уголки)"), CurrentValue = true, Callback = function(v) CornerBox_Enabled = v end})
-VisTab:CreateToggle({Name = L("Skeleton ESP", "Skeleton ESP (Скелет)"), CurrentValue = true, Callback = function(v) Skeleton_Enabled = v end})
-VisTab:CreateToggle({Name = L("Health Bar", "Health Bar (Полоска HP)"), CurrentValue = true, Callback = function(v) HealthBar_Enabled = v end})
-VisTab:CreateToggle({Name = L("Head Dot", "Head Dot (Точка на голове)"), CurrentValue = true, Callback = function(v) HeadDot_Enabled = v end})
-VisTab:CreateToggle({Name = L("Gaze Line", "Gaze Line (Направление взгляда)"), CurrentValue = true, Callback = function(v) GazeLine_Enabled = v end})
-VisTab:CreateToggle({Name = L("Out-of-View Arrows", "Out-of-View (Стрелки за экраном)"), CurrentValue = true, Callback = function(v) OutOfView_Enabled = v end})
+VisTab:CreateToggle({Name = "Corner Box (Стильные уголки)", CurrentValue = true, Callback = function(v) CornerBox_Enabled = v end})
+VisTab:CreateToggle({Name = "Skeleton ESP (Скелет)", CurrentValue = true, Callback = function(v) Skeleton_Enabled = v end})
+VisTab:CreateToggle({Name = "Health Bar (Полоска HP)", CurrentValue = true, Callback = function(v) HealthBar_Enabled = v end})
+VisTab:CreateToggle({Name = "Head Dot (Точка на голове)", CurrentValue = true, Callback = function(v) HeadDot_Enabled = v end})
+VisTab:CreateToggle({Name = "Gaze Line (Направление взгляда)", CurrentValue = true, Callback = function(v) GazeLine_Enabled = v end})
+VisTab:CreateToggle({Name = "Out-of-View (Стрелки за экраном)", CurrentValue = true, Callback = function(v) OutOfView_Enabled = v end})
 
-VisTab:CreateToggle({Name = L("Neon Chams", "Neon Chams (Неоновая подсветка тел)"), CurrentValue = false, Callback = function(v) 
+VisTab:CreateToggle({Name = "Neon Chams (Неоновая подсветка тел)", CurrentValue = false, Callback = function(v) 
     Chams_Enabled = v 
     if not v then for _, p in pairs(Players:GetPlayers()) do if p.Character and p.Character:FindFirstChild("CustomNeonChams") then p.Character.CustomNeonChams:Destroy() end end end
 end})
-VisTab:CreateToggle({Name = L("RGB Rainbow Colors", "RGB Радужные цвета"), CurrentValue = true, Callback = function(v) RGB_Chams = v end})
-
-VisTab:CreateToggle({Name = L("Neon Jump Circle", "Неоновый круг при прыжке"), CurrentValue = false, Callback = function(v) JumpCircle_Enabled = v end})
-VisTab:CreateToggle({Name = L("Neon Walk Trail", "Неоновый след траектории"), CurrentValue = false, Callback = function(v) 
+VisTab:CreateToggle({Name = "RGB Радужные цвета", CurrentValue = true, Callback = function(v) RGB_Chams = v end})
+VisTab:CreateToggle({Name = "Неоновый круг при прыжке", CurrentValue = false, Callback = function(v) JumpCircle_Enabled = v end})
+VisTab:CreateToggle({Name = "Неоновый след траектории", CurrentValue = false, Callback = function(v) 
     WalkTrail_Enabled = v 
     if not v then for _, p in pairs(trailSegments) do p:Destroy() end; trailSegments = {} end 
 end})
 
-VisTab:CreateToggle({Name = L("Show Names", "Показывать Никнеймы"), CurrentValue = true, Callback = function(v) Show_Names = v end})
-VisTab:CreateToggle({Name = "Show Distance", "Показывать Дистанцию", CurrentValue = true, Callback = function(v) Show_Dist = v end})
-VisTab:CreateToggle({Name = L("Show Weapons", "Показывать Оружие в руках"), CurrentValue = true, Callback = function(v) Show_Weapon = v end})
-VisTab:CreateDropdown({Name = L("Visual Color", "Цвет визуала"), Options = {"Rainbow", "Team", "Red", "Green", "Blue"}, CurrentOption = "Rainbow", Callback = function(Opt) Tracer_Color_Mode = Opt[1] end})
+VisTab:CreateToggle({Name = "Показывать Никнеймы", CurrentValue = true, Callback = function(v) Show_Names = v end})
+VisTab:CreateToggle({Name = "Показывать Дистанцию", CurrentValue = true, Callback = function(v) Show_Dist = v end})
+VisTab:CreateToggle({Name = "Показывать Оружие в руках", CurrentValue = true, Callback = function(v) Show_Weapon = v end})
+VisTab:CreateDropdown({Name = "Цвет визуала", Options = {"Rainbow", "Team", "Red", "Green", "Blue"}, CurrentOption = "Rainbow", Callback = function(Opt) Tracer_Color_Mode = Opt[1] end})
 
--- ==================== ВКЛАДКА ИГРОКА ====================
-local PlayerTab = Window:CreateTab(L("Main / Player", "Игрок / Главное"), 4483362458)
-PlayerTab:CreateToggle({Name = L("Infinite Jump", "Бесконечный Прыжок"), CurrentValue = false, Callback = function(v) InfJump_Enabled = v end})
-PlayerTab:CreateToggle({Name = L("Auto Bunny Hop (BHop)", "Авто-Прыжок (BHop)"), CurrentValue = false, Callback = function(v) BHop_Enabled = v end})
-PlayerTab:CreateToggle({Name = L("Speed Hack", "Быстрый бег (Speed)"), CurrentValue = false, Callback = function(v) Speed_Enabled = v end})
-PlayerTab:CreateToggle({Name = L("High Jump", "Высокий прыжок (Jump)"), CurrentValue = false, Callback = function(v) Jump_Enabled = v end})
-PlayerTab:CreateToggle({Name = L("Third Person", "Вид от 3-го лица (Third Person)"), CurrentValue = false, Callback = function(v) 
+-- ИГРОК
+local PlayerTab = Window:CreateTab("Игрок / Главное", 4483362458)
+PlayerTab:CreateToggle({Name = "Ноуклип (Проход сквозь стены)", CurrentValue = false, Callback = function(v) Noclip_Enabled = v end})
+PlayerTab:CreateToggle({Name = "Бесконечный Прыжок", CurrentValue = false, Callback = function(v) InfJump_Enabled = v end})
+PlayerTab:CreateToggle({Name = "Авто-Прыжок (BHop)", CurrentValue = false, Callback = function(v) BHop_Enabled = v end})
+PlayerTab:CreateToggle({Name = "Быстрый бег (Speed)", CurrentValue = false, Callback = function(v) Speed_Enabled = v end})
+PlayerTab:CreateToggle({Name = "Высокий прыжок (Jump)", CurrentValue = false, Callback = function(v) Jump_Enabled = v end})
+PlayerTab:CreateToggle({Name = "Вид от 3-го лица", CurrentValue = false, Callback = function(v) 
     ThirdPerson_Enabled = v 
     ApplyThirdPerson()
 end})
-PlayerTab:CreateDropdown({Name = L("Anti-Aim Mode", "Режим Анти-Аим"), Options = {"Выключено / Off", "Spinbot", "Jitter"}, CurrentOption = "Выключено / Off", Callback = function(Opt) AntiAim_Mode = Opt[1] end})
+PlayerTab:CreateDropdown({Name = "Режим Анти-Аим", Options = {"Выключено / Off", "Spinbot", "Jitter"}, CurrentOption = "Выключено / Off", Callback = function(Opt) AntiAim_Mode = Opt[1] end})
 
-PlayerTab:CreateToggle({Name = L("Enable FOV Changer", "Включить FOV Changer"), CurrentValue = false, Callback = function(v) FOV_Changer_Enabled = v if not v then Camera.FieldOfView = Original_FOV end end})
-PlayerTab:CreateSlider({Name = L("Camera FOV", "Угол обзора камеры (FOV)"), Range = {50, 120}, Increment = 1, CurrentValue = 70, Flag = "CamFOV", Callback = function(v) Custom_FOV = v end})
-
--- ==================== ВКЛАДКА НАСТРОЕК ====================
-local SettingsTab = Window:CreateTab(L("Settings", "Настройки"), 4483362458)
-SettingsTab:CreateParagraph({Title = L("Language Info", "Информация о языке"), Content = L("To change language, please restart script and change 'CurrentLang' at the top of code ('RU' or 'EN').", "Чтобы сменить язык, перезапустите скрипт, изменив переменную 'CurrentLang' в самом начале кода на 'RU' or 'EN'.")})
-
--- === ОСНОВНОЙ ЦИКЛ ОБРАБОТКИ ===
+PlayerTab:CreateToggle({Name = "Включить FOV Changer", CurrentValue = false, Callback = function(v) FOV_Changer_Enabled = v if not v then Camera.FieldOfView = Original_FOV end end})
+PlayerTab:CreateSlider({Name = "Угол обзора камеры (FOV)", Range = {50, 120}, Increment = 1, CurrentValue = 70, Flag = "CamFOV", Callback = function(v) Custom_FOV = v end})
 
 UserInputService.JumpRequest:Connect(function()
     if InfJump_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
@@ -370,18 +333,34 @@ local function isVisible(targetPart)
     return res == nil
 end
 
+local function isTeammate(p)
+    if not Aimbot_TeamCheck or p == LocalPlayer then return p == LocalPlayer end
+    if p.Team and LocalPlayer.Team and p.Team == LocalPlayer.Team then return true end
+    if p.TeamColor and LocalPlayer.TeamColor and p.TeamColor == LocalPlayer.TeamColor then return true end
+    
+    local char, localChar = p.Character, LocalPlayer.Character
+    if char and localChar then
+        local part = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso")
+        local localPart = localChar:FindFirstChild("HumanoidRootPart") or localChar:FindFirstChild("Torso")
+        if part and localPart and part.BrickColor == localPart.BrickColor and part.BrickColor ~= BrickColor.new("Medium stone grey") then
+            return true
+        end
+    end
+    return false
+end
+
 local function getClosestPlayer()
     local closest, maxDist = nil, FOV_Radius
     local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            local isTeam = Aimbot_TeamCheck and ((p.Team and LocalPlayer.Team and p.Team == LocalPlayer.Team) or (p.TeamColor == LocalPlayer.TeamColor))
-            if not isTeam and p.Character and p.Character:FindFirstChild(Aimbot_TargetPart) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-                local targetPart = p.Character[Aimbot_TargetPart]
-                local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                if onScreen then
-                    local dist = (Vector2.new(pos.X, pos.Y) - screenCenter).Magnitude
-                    if dist <= maxDist and isVisible(targetPart) then maxDist = dist; closest = targetPart end
+        if p ~= LocalPlayer and not isTeammate(p) and p.Character and p.Character:FindFirstChild(Aimbot_TargetPart) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+            local targetPart = p.Character[Aimbot_TargetPart]
+            local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+            if onScreen then
+                local dist = (Vector2.new(pos.X, pos.Y) - screenCenter).Magnitude
+                if dist <= maxDist and isVisible(targetPart) then 
+                    maxDist = dist 
+                    closest = targetPart 
                 end
             end
         end
@@ -391,6 +370,14 @@ end
 
 RunService.Stepped:Connect(function()
     currentRgbColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+
+    if Noclip_Enabled and LocalPlayer.Character then
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
 
     FOV_Circle.Visible = FOV_Enabled and Aimbot_Enabled
     FOV_Circle.Radius = FOV_Radius
@@ -559,8 +546,8 @@ RunService.Stepped:Connect(function()
                 
                 if MM2_Revealer then
                     local bp = player:FindFirstChild("Backpack")
-                    if (bp and bp:FindFirstChild("Knife")) or character:FindFirstChild("Knife") then textBuffer = textBuffer .. " [🔪 Murder]"
-                    elseif (bp and bp:FindFirstChild("Gun")) or character:FindFirstChild("Gun") then textBuffer = textBuffer .. " [🔫 Sheriff]" end
+                    if (bp and bp:FindFirstChild("Knife")) or character:FindFirstChild("Knife") then textBuffer = textBuffer .. " [🔪 Убийца]"
+                    elseif (bp and bp:FindFirstChild("Gun")) or character:FindFirstChild("Gun") then textBuffer = textBuffer .. " [🔫 Шериф]" end
                 end
 
                 if Show_Weapon then
@@ -568,7 +555,7 @@ RunService.Stepped:Connect(function()
                     if tool then textBuffer = textBuffer .. " (" .. tool.Name .. ")" end
                 end
 
-                if Show_Dist then textBuffer = textBuffer .. " [" .. math.floor(dist)  .. "m]" end
+                if Show_Dist then textBuffer = textBuffer .. " [" .. math.floor(dist)  .. "м]" end
                 
                 obj.Text.Text = textBuffer
                 obj.Text.Position = Vector2.new(vector.X, boxY - 18)
@@ -601,8 +588,8 @@ RunService.Stepped:Connect(function()
 end)
 
 Rayfield:Notify({
-    Title = "Pulsar Hub | by c00lkidd214anzz",
-    Content = "Скрипт успешно запущен / Script loaded!",
+    Title = "Pulsar Hub",
+    Content = "Скрипт успешно запущен!",
     Duration = 5,
     Image = 4483362458,
 })
