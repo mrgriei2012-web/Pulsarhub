@@ -35,6 +35,10 @@ local HeadDot_Enabled = true
 local GazeLine_Enabled = true    
 local OutOfView_Enabled = true
 
+local Crosshair_Enabled = false
+local Crosshair_Style = "Крестик (+)"
+local Crosshair_Color_Mode = "Rainbow"
+
 local InfJump_Enabled = false
 local BHop_Enabled = false
 local Noclip_Enabled = false
@@ -166,6 +170,21 @@ FOV_Circle.Thickness = 1.5
 FOV_Circle.Color = Color3.fromRGB(255, 255, 255)
 FOV_Circle.NumSides = 64
 
+-- Кастомный прицел (элементы)
+local Crosshair_Dot = Drawing.new("Circle")
+Crosshair_Dot.Visible = false
+Crosshair_Dot.Filled = true
+Crosshair_Dot.Radius = 2
+Crosshair_Dot.NumSides = 12
+
+local Crosshair_H = Drawing.new("Line")
+Crosshair_H.Visible = false
+Crosshair_H.Thickness = 1.5
+
+local Crosshair_V = Drawing.new("Line")
+Crosshair_V.Visible = false
+Crosshair_V.Thickness = 1.5
+
 local function setupESPForPlayer(p)
     if p == LocalPlayer then return end
     if not espObjects[p] then
@@ -277,6 +296,10 @@ VisTab:CreateToggle({Name = "Head Dot (Точка на голове)", CurrentVa
 VisTab:CreateToggle({Name = "Gaze Line (Направление взгляда)", CurrentValue = true, Callback = function(v) GazeLine_Enabled = v end})
 VisTab:CreateToggle({Name = "Out-of-View (Стрелки за экраном)", CurrentValue = true, Callback = function(v) OutOfView_Enabled = v end})
 
+VisTab:CreateToggle({Name = "Кастомный прицел (Crosshair)", CurrentValue = false, Callback = function(v) Crosshair_Enabled = v if not v then Crosshair_Dot.Visible = false; Crosshair_H.Visible = false; Crosshair_V.Visible = false end end})
+VisTab:CreateDropdown({Name = "Форма прицела", Options = {"Крестик (+)", "Точка (.)", "Круг (o)"}, CurrentOption = "Крестик (+)", Callback = function(Opt) Crosshair_Style = Opt[1] end})
+VisTab:CreateDropdown({Name = "Цвет прицела", Options = {"Rainbow", "Red", "Green", "White", "Blue"}, CurrentOption = "Rainbow", Callback = function(Opt) Crosshair_Color_Mode = Opt[1] end})
+
 VisTab:CreateToggle({Name = "Neon Chams (Неоновая подсветка тел)", CurrentValue = false, Callback = function(v) 
     Chams_Enabled = v 
     if not v then for _, p in pairs(Players:GetPlayers()) do if p.Character and p.Character:FindFirstChild("CustomNeonChams") then p.Character.CustomNeonChams:Destroy() end end end
@@ -291,7 +314,7 @@ end})
 VisTab:CreateToggle({Name = "Показывать Никнеймы", CurrentValue = true, Callback = function(v) Show_Names = v end})
 VisTab:CreateToggle({Name = "Показывать Дистанцию", CurrentValue = true, Callback = function(v) Show_Dist = v end})
 VisTab:CreateToggle({Name = "Показывать Оружие в руках", CurrentValue = true, Callback = function(v) Show_Weapon = v end})
-VisTab:CreateDropdown({Name = "Цвет визуала", Options = {"Rainbow", "Team", "Red", "Green", "Blue"}, CurrentOption = "Rainbow", Callback = function(Opt) Tracer_Color_Mode = Opt[1] end})
+VisTab:CreateDropdown({Name = "Цвет визуала (Tracer/Box)", Options = {"Rainbow", "Team", "Red", "Green", "Blue"}, CurrentOption = "Rainbow", Callback = function(Opt) Tracer_Color_Mode = Opt[1] end})
 
 -- ИГРОК
 local PlayerTab = Window:CreateTab("Игрок / Главное", 4483362458)
@@ -382,6 +405,49 @@ RunService.Stepped:Connect(function()
     FOV_Circle.Visible = FOV_Enabled and Aimbot_Enabled
     FOV_Circle.Radius = FOV_Radius
     FOV_Circle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+    -- Рендер кастомного прицела в центре экрана
+    if Crosshair_Enabled then
+        local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+        local cColor = currentRgbColor
+        if Crosshair_Color_Mode == "Red" then cColor = Color3.fromRGB(255, 50, 50)
+        elseif Crosshair_Color_Mode == "Green" then cColor = Color3.fromRGB(50, 255, 50)
+        elseif Crosshair_Color_Mode == "White" then cColor = Color3.fromRGB(255, 255, 255)
+        elseif Crosshair_Color_Mode == "Blue" then cColor = Color3.fromRGB(50, 50, 255) end
+
+        if Crosshair_Style == "Точка (.)" then
+            Crosshair_Dot.Visible = true
+            Crosshair_Dot.Position = center
+            Crosshair_Dot.Radius = 2.5
+            Crosshair_Dot.Color = cColor
+            Crosshair_Dot.Filled = true
+            Crosshair_H.Visible = false
+            Crosshair_V.Visible = false
+        elseif Crosshair_Style == "Круг (o)" then
+            Crosshair_Dot.Visible = true
+            Crosshair_Dot.Position = center
+            Crosshair_Dot.Radius = 6
+            Crosshair_Dot.Color = cColor
+            Crosshair_Dot.Filled = false
+            Crosshair_H.Visible = false
+            Crosshair_V.Visible = false
+        else -- Крестик (+)
+            Crosshair_Dot.Visible = false
+            Crosshair_H.Visible = true
+            Crosshair_H.From = center - Vector2.new(6, 0)
+            Crosshair_H.To = center + Vector2.new(6, 0)
+            Crosshair_H.Color = cColor
+            
+            Crosshair_V.Visible = true
+            Crosshair_V.From = center - Vector2.new(0, 6)
+            Crosshair_V.To = center + Vector2.new(0, 6)
+            Crosshair_V.Color = cColor
+        end
+    else
+        Crosshair_Dot.Visible = false
+        Crosshair_H.Visible = false
+        Crosshair_V.Visible = false
+    end
 
     if FOV_Changer_Enabled then Camera.FieldOfView = Custom_FOV end
 
@@ -546,8 +612,11 @@ RunService.Stepped:Connect(function()
                 
                 if MM2_Revealer then
                     local bp = player:FindFirstChild("Backpack")
-                    if (bp and bp:FindFirstChild("Knife")) or character:FindFirstChild("Knife") then textBuffer = textBuffer .. " [🔪 Убийца]"
-                    elseif (bp and bp:FindFirstChild("Gun")) or character:FindFirstChild("Gun") then textBuffer = textBuffer .. " [🔫 Шериф]" end
+                    if (bp and (bp:FindFirstChild("Knife") or bp:FindFirstChild("Dagger"))) or character:FindFirstChild("Knife") or character:FindFirstChild("Dagger") then 
+                        textBuffer = textBuffer .. " [🔪 Убийца]"
+                    elseif (bp and (bp:FindFirstChild("Gun") or bp:FindFirstChild("Revolver"))) or character:FindFirstChild("Gun") or character:FindFirstChild("Revolver") then 
+                        textBuffer = textBuffer .. " [🔫 Шериф]" 
+                    end
                 end
 
                 if Show_Weapon then
