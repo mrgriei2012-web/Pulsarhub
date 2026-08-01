@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
@@ -39,6 +40,9 @@ local Crosshair_Enabled = false
 local Crosshair_Style = "Крестик (+)"
 local Crosshair_Color_Mode = "Rainbow"
 
+local Fog_Enabled = false
+local RGB_World_Enabled = false
+
 local InfJump_Enabled = false
 local BHop_Enabled = false
 local Noclip_Enabled = false
@@ -69,6 +73,7 @@ local Cheat_Jump = 120
 local Original_Speed = 16
 local Original_Jump = 50
 local Original_FOV = Camera.FieldOfView
+local Original_FogEnd = Lighting.FogEnd
 
 local function ApplyThirdPerson()
     if ThirdPerson_Enabled then
@@ -170,7 +175,6 @@ FOV_Circle.Thickness = 1.5
 FOV_Circle.Color = Color3.fromRGB(255, 255, 255)
 FOV_Circle.NumSides = 64
 
--- Кастомный прицел (элементы)
 local Crosshair_Dot = Drawing.new("Circle")
 Crosshair_Dot.Visible = false
 Crosshair_Dot.Filled = true
@@ -300,6 +304,16 @@ VisTab:CreateToggle({Name = "Кастомный прицел (Crosshair)", Curre
 VisTab:CreateDropdown({Name = "Форма прицела", Options = {"Крестик (+)", "Точка (.)", "Круг (o)"}, CurrentOption = "Крестик (+)", Callback = function(Opt) Crosshair_Style = Opt[1] end})
 VisTab:CreateDropdown({Name = "Цвет прицела", Options = {"Rainbow", "Red", "Green", "White", "Blue"}, CurrentOption = "Rainbow", Callback = function(Opt) Crosshair_Color_Mode = Opt[1] end})
 
+-- ТУМБЛЕРЫ ТУМАНА И RGB МИРА ТЕПЕРЬ НА СВОЕМ МЕСТЕ
+VisTab:CreateToggle({Name = "Туман (Custom Fog)", CurrentValue = false, Callback = function(v) 
+    Fog_Enabled = v 
+    if not v then Lighting.FogEnd = Original_FogEnd end 
+end})
+VisTab:CreateToggle({Name = "RGB Мир (Радужное освещение)", CurrentValue = false, Callback = function(v) 
+    RGB_World_Enabled = v 
+    if not v then Lighting.Ambient = Color3.fromRGB(0,0,0) end 
+end})
+
 VisTab:CreateToggle({Name = "Neon Chams (Неоновая подсветка тел)", CurrentValue = false, Callback = function(v) 
     Chams_Enabled = v 
     if not v then for _, p in pairs(Players:GetPlayers()) do if p.Character and p.Character:FindFirstChild("CustomNeonChams") then p.Character.CustomNeonChams:Destroy() end end end
@@ -394,6 +408,16 @@ end
 RunService.Stepped:Connect(function()
     currentRgbColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
 
+    if Fog_Enabled then
+        Lighting.FogEnd = 300
+        Lighting.FogColor = currentRgbColor
+    end
+
+    if RGB_World_Enabled then
+        Lighting.Ambient = currentRgbColor
+        Lighting.OutdoorAmbient = currentRgbColor
+    end
+
     if Noclip_Enabled and LocalPlayer.Character then
         for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide then
@@ -406,7 +430,6 @@ RunService.Stepped:Connect(function()
     FOV_Circle.Radius = FOV_Radius
     FOV_Circle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-    -- Рендер кастомного прицела в центре экрана
     if Crosshair_Enabled then
         local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
         local cColor = currentRgbColor
@@ -431,7 +454,7 @@ RunService.Stepped:Connect(function()
             Crosshair_Dot.Filled = false
             Crosshair_H.Visible = false
             Crosshair_V.Visible = false
-        else -- Крестик (+)
+        else
             Crosshair_Dot.Visible = false
             Crosshair_H.Visible = true
             Crosshair_H.From = center - Vector2.new(6, 0)
