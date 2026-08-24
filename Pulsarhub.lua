@@ -7,22 +7,18 @@ local Lighting = game:GetService("Lighting")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
-local Luna = loadstring(game:HttpGet("https://raw.nebulasoftworks.xyz/luna", true))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local Window = Luna:CreateWindow({
+local Window = Rayfield:CreateWindow({
     Name = "Pulsar Hub | by c00lkidd214anzz",
-    Subtitle = "v1.0",
-    LogoID = "rbxassetid://6023426915",
-    LoadingEnabled = true,
     LoadingTitle = "Загрузка скрипта...",
     LoadingSubtitle = "by c00lkidd214anzz",
-    Theme = "Dark",
     ConfigurationSaving = {
         Enabled = false,
         FolderName = "PulsarHubConfig",
         FileName = "VisualsConfig"
     },
-    KeySystem = false
+    KeySystem = false,
 })
 
 -- Состояния
