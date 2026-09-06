@@ -1,5 +1,5 @@
 -- =====================================================================
--- Pulsar Hub v6.8 - Fixed Edition (c00lkidd214anzz)
+-- Pulsar Hub v6.8 - Final Fixed Edition (c00lkidd214anzz)
 -- =====================================================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -71,7 +71,6 @@ ScreenGui.Parent = CoreGui
 
 
 -- ================= СОСТОЯНИЯ =================
--- Aimbot & Rage (3600/360 Aimbot отдельно)
 local Aimbot_Enabled = false
 local Aimbot_Mode = "Legit" -- Legit / 360 Rage Aimbot
 local Aimbot_TargetPart = "Head"
@@ -83,6 +82,7 @@ local FOV_Radius = 180
 
 -- Visuals
 local ESP_Enabled = true
+local ESP_TeamCheck = true -- Тимчек для ESP (теперь есть!)
 local CornerBox_Enabled = true   
 local Skeleton_Enabled = true
 local HealthBar_Enabled = true
@@ -100,7 +100,7 @@ local Crosshair_Enabled = true
 local Fog_Enabled = false
 local RGB_World_Enabled = false
 
--- Player & Movement (Крутилка / Spinbot в игроке!)
+-- Player & Movement
 local Noclip_Enabled = false
 local InfJump_Enabled = false
 local BHop_Enabled = false
@@ -385,7 +385,7 @@ TitleLabel.Position = UDim2.new(0, 70, 0, 6)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.RichText = true
-TitleLabel.Text = "Pulsar Hub <font size='9' color='#A0A0B0'>v6.8 Fixed Edition | c00lkidd214anzz</font>"
+TitleLabel.Text = "Pulsar Hub <font size='9' color='#A0A0B0'>v6.8 Final Edition | c00lkidd214anzz</font>"
 TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 245)
 TitleLabel.TextSize = 11
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -423,7 +423,7 @@ local function createTab(name, iconText, index)
     container.Size = UDim2.new(1, -132, 1, -40)
     container.Position = UDim2.new(0, 130, 0, 36)
     container.BackgroundTransparency = 1
-    container.CanvasSize = UDim2.new(0, 0, 0, 1100)
+    container.CanvasSize = UDim2.new(0, 0, 0, 1150)
     container.ScrollBarThickness = 2
     container.Visible = (index == 1)
     container.ZIndex = 3
@@ -583,27 +583,28 @@ createSlider(AimTab, "Плавность / Smooth (для Legit)", 1, 20, 4, 290
 
 -- 2. VISUALS
 createToggle(VisTab, "Включить ESP Master", "Главный переключатель подсветки игроков", 5, function(v) ESP_Enabled = v end, true)
-createToggle(VisTab, "Corner Box ESP", "Стильные уголки вокруг противников", 50, function(v) CornerBox_Enabled = v end, true)
-createToggle(VisTab, "Skeleton ESP", "Отображение скелета игроков", 95, function(v) Skeleton_Enabled = v end, true)
-createToggle(VisTab, "Health Bar", "Полоска здоровья сбоку от бокса", 140, function(v) HealthBar_Enabled = v end, true)
-createToggle(VisTab, "Head Dot", "Точка на голове цели", 185, function(v) HeadDot_Enabled = v end, true)
-createToggle(VisTab, "Gaze Line", "Линия направления взгляда врага", 230, function(v) GazeLine_Enabled = v end, true)
-createToggle(VisTab, "Out-of-View Arrows", "Стрелки-указатели на врагов вне экрана", 275, function(v) OutOfView_Enabled = v end, true)
-createToggle(VisTab, "Tracers (Линии до врагов)", "Линии от низа экрана к игрокам", 320, function(v) Tracers_Enabled = v end, true)
-createToggle(VisTab, "Neon Chams (Подсветка тел)", "Неоновое подсвечивание тел сквозь стены", 365, function(v) Chams_Enabled = v end, true)
-createSlider(VisTab, "Прозрачность Chams (Тело)", 0, 100, 40, 415, function(v) Chams_FillTransp = v / 100 end)
-createSlider(VisTab, "Прозрачность Chams (Обводка)", 0, 100, 10, 475, function(v) Chams_OutlineTransp = v / 100 end)
-createToggle(VisTab, "Кастомный прицел", "Включить точку по центру экрана", 535, function(v) Crosshair_Enabled = v end, true)
-createToggle(VisTab, "Кастомный туман", "Атмосферный туман на карте", 580, function(v) Fog_Enabled = v end)
-createToggle(VisTab, "RGB Радужный мир", "Переливание освещения карты в цветах радуги", 625, function(v) RGB_World_Enabled = v end)
-createToggle(VisTab, "Никнеймы игроков", "Показывать имена над головой", 670, function(v) Show_Names = v end, true)
-createToggle(VisTab, "Дистанция", "Показывать расстояние до противников", 715, function(v) Show_Dist = v end, true)
-createToggle(VisTab, "Оружие в руках", "Отображать текущий предмет игрока", 760, function(v) Show_Weapon = v end, true)
+createToggle(VisTab, "ESP Team Check", "Не подсвечивать союзников по команде", 50, function(v) ESP_TeamCheck = v end, true)
+createToggle(VisTab, "Corner Box ESP", "Стильные уголки вокруг противников", 95, function(v) CornerBox_Enabled = v end, true)
+createToggle(VisTab, "Skeleton ESP", "Отображение скелета игроков", 140, function(v) Skeleton_Enabled = v end, true)
+createToggle(VisTab, "Health Bar", "Полоска здоровья сбоку от бокса", 185, function(v) HealthBar_Enabled = v end, true)
+createToggle(VisTab, "Head Dot", "Точка на голове цели", 230, function(v) HeadDot_Enabled = v end, true)
+createToggle(VisTab, "Gaze Line", "Линия направления взгляда врага", 275, function(v) GazeLine_Enabled = v end, true)
+createToggle(VisTab, "Out-of-View Arrows", "Стрелки-указатели на врагов вне экрана", 320, function(v) OutOfView_Enabled = v end, true)
+createToggle(VisTab, "Tracers (Линии до врагов)", "Линии от низа экрана к игрокам", 365, function(v) Tracers_Enabled = v end, true)
+createToggle(VisTab, "Neon Chams (Подсветка тел)", "Неоновое подсвечивание тел сквозь стены", 410, function(v) Chams_Enabled = v end, true)
+createSlider(VisTab, "Прозрачность Chams (Тело)", 0, 100, 40, 460, function(v) Chams_FillTransp = v / 100 end)
+createSlider(VisTab, "Прозрачность Chams (Обводка)", 0, 100, 10, 520, function(v) Chams_OutlineTransp = v / 100 end)
+createToggle(VisTab, "Кастомный прицел", "Включить точку по центру экрана", 580, function(v) Crosshair_Enabled = v end, true)
+createToggle(VisTab, "Кастомный туман", "Атмосферный туман на карте", 625, function(v) Fog_Enabled = v end)
+createToggle(VisTab, "RGB Радужный мир", "Переливание освещения карты в цветах радуги", 670, function(v) RGB_World_Enabled = v end)
+createToggle(VisTab, "Никнеймы игроков", "Показывать имена над головой", 715, function(v) Show_Names = v end, true)
+createToggle(VisTab, "Дистанция", "Показывать расстояние до противников", 760, function(v) Show_Dist = v end, true)
+createToggle(VisTab, "Оружие в руках", "Отображать текущий предмет игрока", 805, function(v) Show_Weapon = v end, true)
 
 -- Выбор цвета ESP
 local EspColorTitle = Instance.new("TextLabel")
 EspColorTitle.Size = UDim2.new(1, -20, 0, 20)
-EspColorTitle.Position = UDim2.new(0, 10, 0, 810)
+EspColorTitle.Position = UDim2.new(0, 10, 0, 855)
 EspColorTitle.BackgroundTransparency = 1
 EspColorTitle.Font = Enum.Font.GothamMedium
 EspColorTitle.Text = "Цвет ESP и подсветки:"
@@ -624,7 +625,7 @@ local espColors = {
 for i, colInfo in ipairs(espColors) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 90, 0, 26)
-    btn.Position = UDim2.new(0, 10 + ((i - 1) % 3) * 98, 0, 835 + (math.floor((i - 1) / 3) * 34))
+    btn.Position = UDim2.new(0, 10 + ((i - 1) % 3) * 98, 0, 880 + (math.floor((i - 1) / 3) * 34))
     btn.BackgroundColor3 = colInfo.Color
     btn.Font = Enum.Font.GothamMedium
     btn.Text = colInfo.Name
@@ -640,7 +641,7 @@ for i, colInfo in ipairs(espColors) do
 end
 
 
--- 3. PLAYER (Крутилка / Spinbot тут!)
+-- 3. PLAYER
 createToggle(PlayerTab, "Крутилка (Spinbot 360/3600)", "Безумное вращение модельки игрока для дезориентации врагов", 5, function(v) Spinbot_Enabled = v end)
 createSlider(PlayerTab, "Скорость крутилки (Spin Speed)", 10, 150, 50, 50, function(v) Spinbot_Speed = v end)
 
@@ -675,7 +676,6 @@ createToggle(PlayerTab, "Ходьба вне раунда (Unfreeze)", "Позв
 createToggle(PlayerTab, "Безопасные хитбоксы (Hitbox Extender)", "Увеличение хитбоксов", 760, function(v) Hitbox_Enabled = v end)
 createSlider(PlayerTab, "Размер хитбоксов", 2, 8, 3, 805, function(v) Hitbox_Size = v end)
 
--- Телепортация
 local TpTitle = Instance.new("TextLabel")
 TpTitle.Size = UDim2.new(1, -20, 0, 20)
 TpTitle.Position = UDim2.new(0, 10, 0, 875)
@@ -873,7 +873,13 @@ local function isTeammate(p)
     return false
 end
 
--- ИСПРАВЛЕННАЯ ФУНКЦИЯ (Тим-чек и Валл-чек работают везде корректно)
+-- Функция тимчека для ESP
+local function isEspTeammate(p)
+    if not ESP_TeamCheck or p == LocalPlayer then return p == LocalPlayer and ESP_TeamCheck end
+    if p.Team and LocalPlayer.Team and p.Team == LocalPlayer.Team then return true end
+    return false
+end
+
 local function getClosestPlayer()
     local closest, maxDist = nil, math.huge
     local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -960,7 +966,6 @@ RunService.Stepped:Connect(function()
         if hum.WalkSpeed < 16 then hum.WalkSpeed = 16 end
     end
 
-    -- КРУТИЛКА В ИГРОКЕ
     if Spinbot_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = LocalPlayer.Character.HumanoidRootPart
         hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(Spinbot_Speed), 0)
@@ -1043,7 +1048,10 @@ RunService.Stepped:Connect(function()
 
     for player, obj in pairs(espObjects) do
         local character = player.Character
-        if ESP_Enabled and character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
+        -- Применяем ESP Team Check здесь
+        local isTeamMember = isEspTeammate(player)
+        
+        if ESP_Enabled and not isTeamMember and character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
             local rootPart = character.HumanoidRootPart
             local vector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
 
@@ -1153,6 +1161,10 @@ RunService.Stepped:Connect(function()
                 obj.HeadDot.Visible = false; obj.GazeLine.Visible = false
             end
         else
+            -- Если это союзник или игрок не подходит под условия ESP, скрываем всю его подсветку
+            if character and character:FindFirstChild("CustomNeonChams") then
+                character.CustomNeonChams:Destroy()
+            end
             for _, c in pairs(obj.Corners) do c.Visible = false end
             obj.Text.Visible = false; obj.HealthBarBG.Visible = false; obj.HealthBar.Visible = false
             obj.HeadDot.Visible = false; obj.GazeLine.Visible = false; obj.OIVArrow.Visible = false; if obj.TracerLine then obj.TracerLine.Visible = false end
@@ -1160,4 +1172,4 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-print("Pulsar Hub v6.8 Fixed Edition Loaded Successfully! Created by c00lkidd214anzz")
+print("Pulsar Hub v6.8 Final Edition Loaded Successfully! Created by c00lkidd214anzz")
